@@ -1,0 +1,7 @@
+# IDEs
+.idea
+.vscode
+
+# Built code
+dist
+build
