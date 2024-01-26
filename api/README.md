@@ -10,4 +10,9 @@ yarn start
 
 # Watch mode
 yarn dev
+
+# In a docker container
+yarn docker:start
+yarn docker:logs
+yarn docker:stop
 ```

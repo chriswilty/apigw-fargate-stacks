@@ -1,0 +1,8 @@
+services:
+  counter-api:
+    environment:
+      NODE_ENV: development
+    build: .
+    image: 'chriswilty/counter-api'
+    ports:
+      - '3000:3000'
