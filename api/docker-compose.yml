@@ -3,6 +3,6 @@ services:
     environment:
       NODE_ENV: development
     build: .
-    image: 'chriswilty/counter-api'
+    image: 'chriswilty/session-counter-api'
     ports:
       - '3000:3000'

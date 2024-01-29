@@ -1,9 +1,8 @@
 FROM node:lts-alpine
 WORKDIR /usr/app
-# TODO Work out what to include here... Maybe we need independent modules
 COPY package*.json ./
-#RUN yarn install
+RUN npm ci
 COPY . .
 EXPOSE 3000
-RUN yarn build
-CMD ["tsx", "-r", "dotenv/config", "server.ts"]
+RUN npm run build
+CMD ["./node_modules/.bin/tsx", "-r", "dotenv/config", "server.ts"]
