@@ -4,7 +4,11 @@
 	"author": "Chris Wilton-Magras",
 	"type": "module",
 	"scripts": {
+		"postinstall": "concurrently \"cd api && npm ci\" \"cd ui && npm ci\"",
 		"start:api": "cd api && npm start",
 		"start:ui": "cd ui && npm start"
+	},
+	"devDependencies": {
+		"concurrently": "^8.2.2"
 	}
 }
