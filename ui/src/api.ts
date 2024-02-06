@@ -2,8 +2,8 @@ export type Counter = {
 	count: number
 };
 
-const defaultUrl = 'http://localhost:3000'
-const baseUrl = `${process.env['API_URL'] ?? defaultUrl}/counter`;
+const defaultUrl = 'http://localhost:3000';
+const baseUrl = new URL('/counter', process.env['API_URL'] ?? defaultUrl).toString();
 
 const commonFetch = async (path: string, method: string = 'GET') => fetch(`${baseUrl}/${path}`, {
 	method,

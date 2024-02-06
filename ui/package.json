@@ -4,13 +4,15 @@
 	"author": "Chris Wilton-Magras",
 	"type": "module",
 	"scripts": {
+		"prebuild": "rimraf dist",
 		"build": "parcel build src/index.html",
 		"start": "parcel src/index.html"
 	},
 	"devDependencies": {
 		"@tsconfig/strictest": "^2.0.2",
 		"@types/node": "18.19.10",
-		"parcel": "^2.11.0"
+		"parcel": "^2.11.0",
+		"rimraf": "^5.0.5"
 	},
 	"dependencies": {
 		"hybrids": "^8.2.10"

@@ -9,6 +9,7 @@ declare module 'express-session' {
 	}
 }
 
+const cookieSID = process.env['COOKIE_SID'];
 const allowOrigin = process.env['CORS_ALLOW_ORIGIN'];
 const counterPath = '/counter';
 const maxCookieAge = 60 * 60 * 1000; //1hr session keep-alive
@@ -21,6 +22,46 @@ const env = app.get('env');
 const isProd = env === 'production';
 console.log(`env=${env}`);
 
+// Alas, "trust proxy" is broken by default with Express behind HTTP API Gateway:
+// https://github.com/expressjs/express/issues/5459
+// https://repost.aws/en/questions/QUtBHMaz7IQ6aM4RCBMnJvgw/why-does-apigw-http-api-use-forwarded-header-while-other-services-still-use-x-forwarded-headers
+//
+// Therefore we use Express API overrides to modify our Request IP and Protocol properties:
+// https://expressjs.com/en/guide/overriding-express-api.html
+const parseForwardedHeader = (header?: string) =>
+	header?.split(",")
+		.flatMap((proxy) => proxy.split(';'))
+		.reduce(
+			(result, proxyProps) => {
+				const [key, value] = proxyProps.split('=');
+				if (key && value) {
+					result[key] = (result[key] || []).concat(value);
+				}
+				return result;
+			},
+			{} as Record<string, string[]>
+		);
+
+Object.defineProperty(app.request, 'ip', {
+	configurable: true,
+	enumerable: true,
+	get() {
+		const header = this.header('Forwarded') as ReturnType<typeof app.request.header>;
+		const proxies = parseForwardedHeader(header);
+		return proxies?.['for']?.[0] ?? this.socket.remoteAddress;
+	}
+});
+
+Object.defineProperty(app.request, 'protocol', {
+	configurable: true,
+	enumerable: true,
+	get() {
+		const header = this.header('Forwarded') as ReturnType<typeof app.request.header>;
+		const proxies = parseForwardedHeader(header);
+		return proxies?.['proto']?.[0] ?? this.socket.encrypted ? 'https' : 'http';
+	}
+});
+
 // Generic middleware
 app
 	.use(express.json())
@@ -31,12 +72,10 @@ app
 
 // Session shenanigans
 app
-	.set('trust proxy', isProd)
 	.use(
 		counterPath,
 		session({
-			// TODO Read SID from env vars!
-			name: 'apigw-fargate.sid',
+			name: cookieSID,
 			resave: false,
 			saveUninitialized: true,
 			secret: sessionSigningSecret,
@@ -47,7 +86,7 @@ app
 				maxAge: maxCookieAge,
 				path: counterPath,
 				sameSite: isProd ? 'none' : 'strict',
-				secure: isProd
+				secure: isProd,
 			},
 		}),
 		(req, _res, next) => {
@@ -55,6 +94,13 @@ app
 			if (req.session.count === undefined) {
 				req.session.count = 0;
 			}
+			next();
+		},
+		(req, res, next) => {
+			console.log('Request:', req.ip, `secure=${req.secure}`, req.headers);
+			res.on('finish', () => {
+				console.log('Response:', req.path, res.getHeaders());
+			});
 			next();
 		}
 	);
