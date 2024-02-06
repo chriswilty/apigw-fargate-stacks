@@ -12,7 +12,7 @@ declare module 'express-session' {
 const allowOrigin = process.env['CORS_ALLOW_ORIGIN'];
 const counterPath = '/counter';
 const maxCookieAge = 60 * 60 * 1000; //1hr session keep-alive
-const port = 3000;
+const port = Number.parseInt(process.env['PORT'] ?? '3000');
 const sessionSigningSecret =
 	'In a real app this might be read from a secrets manager';
 
@@ -35,7 +35,8 @@ app
 	.use(
 		counterPath,
 		session({
-			name: 'apigw-fargate-stacks.sid',
+			// TODO Read SID from env vars!
+			name: 'apigw-fargate.sid',
 			resave: false,
 			saveUninitialized: true,
 			secret: sessionSigningSecret,

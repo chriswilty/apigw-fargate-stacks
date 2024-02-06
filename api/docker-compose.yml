@@ -5,4 +5,4 @@ services:
     build: .
     image: 'chriswilty/session-counter-api'
     ports:
-      - '3000:3000'
+      - '${PORT}:${PORT}'
