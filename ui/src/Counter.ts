@@ -98,8 +98,8 @@ define<CounterView>({
 		}
 		button[aria-disabled=true] {
 			cursor: not-allowed;
-			background-color: #333;
-			color: #CCC;
+			background-color: #777;
+			color: black;
 		}
 		button ~ .tooltip {
 			display: none;
@@ -111,6 +111,7 @@ define<CounterView>({
 			top: calc(100% + 0.5rem);
 			left: 0;
 			font-size: 1.25rem;
+			color: white;
 			white-space: nowrap;
 		}
 		button .arrow {
