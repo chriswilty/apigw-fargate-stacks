@@ -7,6 +7,9 @@ declare module 'express-session' {
 	interface SessionData {
 		count: number;
 	}
+	interface CookieOptions {
+		partitioned: boolean; // TODO express-session types are not yet up-to-date!
+	}
 }
 
 const cookieSID = process.env['COOKIE_SID'];
@@ -85,6 +88,7 @@ app
 			cookie: {
 				maxAge: maxCookieAge,
 				path: counterPath,
+				partitioned: isProd,
 				sameSite: isProd ? 'none' : 'strict',
 				secure: isProd,
 			},
