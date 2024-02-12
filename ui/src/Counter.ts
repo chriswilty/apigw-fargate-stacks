@@ -7,7 +7,7 @@ const Counter: Model<Counter> = {
 	count: 0,
 	[store.connect]: {
 		get: () => getCount(),
-		set: (_model, value) => value
+		set: (_model, value) => value,
 	},
 };
 
@@ -22,7 +22,7 @@ const decrementCount = async (host: CounterView) => {
 	if (host.counter.count > 0) {
 		await store.set(host.counter, await decrement());
 	}
-}
+};
 
 define<CounterView>({
 	tag: 'counter-view',
@@ -39,10 +39,7 @@ define<CounterView>({
 					<span class="arrow" aria-hidden="true">&darr;</span>
 					Down
 				</button>
-				<button
-					aria-disabled="${'' + !store.ready(counter)}"
-					onclick="${incrementCount}"
-				>
+				<button aria-disabled="${'' + !store.ready(counter)}" onclick="${incrementCount}">
 					<span class="arrow" aria-hidden="true">&uarr;</span>
 					Up
 				</button>
@@ -118,5 +115,5 @@ define<CounterView>({
 			font-size: 2rem;
 			line-height: 1;
 		}
-	`
+	`,
 });

@@ -33,4 +33,3 @@ the plank, yarrr.
 - `GET /counter` - gets the current count
 - `PATCH /counter/up` - increments the count and returns the new value
 - `PATCH /counter/down` - decrements the count and returns the new value
-

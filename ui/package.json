@@ -6,7 +6,8 @@
 	"scripts": {
 		"prebuild": "rimraf dist",
 		"build": "parcel build src/index.html",
-		"start": "parcel src/index.html"
+		"start": "parcel src/index.html",
+		"format": "prettier . --write"
 	},
 	"devDependencies": {
 		"@tsconfig/strictest": "^2.0.2",

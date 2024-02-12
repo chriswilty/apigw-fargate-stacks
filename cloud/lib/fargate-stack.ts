@@ -12,7 +12,7 @@ import { appName, resourceName } from './resourceNamingUtils';
 
 type FargateStackProps = StackProps & {
 	webappUrl: string;
-}
+};
 
 export class FargateStack extends Stack {
 	public readonly applicationLoadBalancer: ApplicationLoadBalancer;
@@ -27,13 +27,9 @@ export class FargateStack extends Stack {
 
 		const generateResourceName = resourceName(scope);
 
-		const dockerImageAsset = new DockerImageAsset(
-			this,
-			generateResourceName('container-image'),
-			{
-				directory: join(__dirname, '../../api/'),
-			}
-		);
+		const dockerImageAsset = new DockerImageAsset(this, generateResourceName('container-image'), {
+			directory: join(__dirname, '../../api/'),
+		});
 
 		const containerPort = Number.parseInt(CONTAINER_PORT ?? '3000');
 		const clusterName = generateResourceName('cluster');
@@ -50,30 +46,26 @@ export class FargateStack extends Stack {
 		});
 
 		// Create a private, application-load-balanced Fargate service
-		const fargateService = new ApplicationLoadBalancedFargateService(
-			this,
-			fargateServiceName,
-			{
-				serviceName: fargateServiceName,
-				cluster: new Cluster(this, clusterName, { clusterName, vpc: this.vpc }),
-				cpu: 256, // Default is 256
-				desiredCount: 1,
-				taskImageOptions: {
-					image: ContainerImage.fromDockerImageAsset(dockerImageAsset),
-					containerPort,
-					environment: {
-						NODE_ENV: 'production',
-						COOKIE_SID: `${appName}.sid`,
-						CORS_ALLOW_ORIGIN: webappUrl,
-						PORT: `${containerPort}`,
-					},
+		const fargateService = new ApplicationLoadBalancedFargateService(this, fargateServiceName, {
+			serviceName: fargateServiceName,
+			cluster: new Cluster(this, clusterName, { clusterName, vpc: this.vpc }),
+			cpu: 256, // Default is 256
+			desiredCount: 1,
+			taskImageOptions: {
+				image: ContainerImage.fromDockerImageAsset(dockerImageAsset),
+				containerPort,
+				environment: {
+					NODE_ENV: 'production',
+					COOKIE_SID: `${appName}.sid`,
+					CORS_ALLOW_ORIGIN: webappUrl,
+					PORT: `${containerPort}`,
 				},
-				memoryLimitMiB: 512, // Default is 512
-				loadBalancerName,
-				publicLoadBalancer: false,
-				propagateTags: PropagatedTagSource.SERVICE,
-			}
-		);
+			},
+			memoryLimitMiB: 512, // Default is 512
+			loadBalancerName,
+			publicLoadBalancer: false,
+			propagateTags: PropagatedTagSource.SERVICE,
+		});
 		fargateService.targetGroup.configureHealthCheck({
 			path: HEALTHCHECK_PATH,
 		});

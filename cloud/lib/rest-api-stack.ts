@@ -23,7 +23,7 @@ type RestApiStackProps = StackProps & {
 	logBucket: Bucket;
 	vpc: Vpc;
 	webappUrl: string;
-}
+};
 
 export class RestApiStack extends Stack {
 	constructor(scope: Construct, id: string, props: RestApiStackProps) {
@@ -35,7 +35,7 @@ export class RestApiStack extends Stack {
 		const generateResourceName = resourceName(scope);
 
 		// Create network loadbalancer targeting our application loadbalancer
-		const nlbName = generateResourceName('nlb')
+		const nlbName = generateResourceName('nlb');
 		const nlbListenerName = generateResourceName('nlb-listener');
 		const nlbTargetName = generateResourceName('nlb-targets');
 		const nlbSecurityGroupName = generateResourceName('nlb-secgroup');
@@ -80,31 +80,33 @@ export class RestApiStack extends Stack {
 			restApiName: apiName,
 			deployOptions: { stageName },
 		});
-		api.root.addProxy({
-			defaultMethodOptions: {
-				requestParameters: {
-					'method.request.path.proxy': true, //TODO blog this!
-				},
-			},
-			defaultIntegration: new Integration({
-				type: IntegrationType.HTTP_PROXY,
-				uri: `http://${nlb.loadBalancerDnsName}/{proxy}`, //TODO blog this!
-				integrationHttpMethod: 'ANY',
-				options: {
-					connectionType: ConnectionType.VPC_LINK,
-					vpcLink,
+		api.root
+			.addProxy({
+				defaultMethodOptions: {
 					requestParameters: {
-						'integration.request.path.proxy': 'method.request.path.proxy', //TODO blog this!
+						'method.request.path.proxy': true, //TODO blog this!
 					},
 				},
-			}),
-			anyMethod: true,
-		}).addCorsPreflight({
-			allowOrigins: [webappUrl],
-			allowMethods: Cors.ALL_METHODS,
-			allowHeaders: ['X-Forwarded-For', 'Content-Type', 'Authorization'],
-			allowCredentials: true, // Need this for Cookie headers //TODO blog this!
-		});
+				defaultIntegration: new Integration({
+					type: IntegrationType.HTTP_PROXY,
+					uri: `http://${nlb.loadBalancerDnsName}/{proxy}`, //TODO blog this!
+					integrationHttpMethod: 'ANY',
+					options: {
+						connectionType: ConnectionType.VPC_LINK,
+						vpcLink,
+						requestParameters: {
+							'integration.request.path.proxy': 'method.request.path.proxy', //TODO blog this!
+						},
+					},
+				}),
+				anyMethod: true,
+			})
+			.addCorsPreflight({
+				allowOrigins: [webappUrl],
+				allowMethods: Cors.ALL_METHODS,
+				allowHeaders: ['X-Forwarded-For', 'Content-Type', 'Authorization'],
+				allowCredentials: true, // Need this for Cookie headers //TODO blog this!
+			});
 
 		new CfnOutput(this, 'APIGatewayURL', { value: api.url });
 	}

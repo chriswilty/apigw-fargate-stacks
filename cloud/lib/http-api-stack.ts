@@ -11,7 +11,7 @@ type HttpApiStackProps = StackProps & {
 	applicationLoadBalancer: ApplicationLoadBalancer;
 	vpc: Vpc;
 	webappUrl: string;
-}
+};
 
 export class HttpApiStack extends Stack {
 	constructor(scope: Construct, id: string, props: HttpApiStackProps) {
@@ -35,7 +35,11 @@ export class HttpApiStack extends Stack {
 			allowAllOutbound: false,
 		});
 		vpcLinkSecurityGroup.connections.allowFromAnyIpv4(Port.tcp(80), 'APIGW to VPCLink');
-		vpcLinkSecurityGroup.connections.allowTo(applicationLoadBalancer, Port.tcp(80), 'VPCLink to ALB');
+		vpcLinkSecurityGroup.connections.allowTo(
+			applicationLoadBalancer,
+			Port.tcp(80),
+			'VPCLink to ALB'
+		);
 		vpcLink.addSecurityGroups(vpcLinkSecurityGroup);
 
 		// Tags are not propagated, so must do this manually
@@ -53,7 +57,7 @@ export class HttpApiStack extends Stack {
 					CorsHttpMethod.HEAD,
 					CorsHttpMethod.OPTIONS,
 					CorsHttpMethod.GET,
-					CorsHttpMethod.PATCH // CorsHttpMethod.ANY does not work!
+					CorsHttpMethod.PATCH, // CorsHttpMethod.ANY does not work!
 				],
 				allowHeaders: ['X-Forwarded-For', 'Content-Type', 'Authorization'],
 				allowCredentials: true,
@@ -64,12 +68,12 @@ export class HttpApiStack extends Stack {
 			integration: new HttpAlbIntegration(
 				generateResourceName('api-integration'),
 				applicationLoadBalancer.listeners[0],
-				{ vpcLink },
+				{ vpcLink }
 			),
 		});
 
 		new CfnOutput(this, 'APIGW URL', {
-			value: api.defaultStage?.url ?? 'ERROR: No default stage added!'
+			value: api.defaultStage?.url ?? 'ERROR: No default stage added!',
 		});
 	}
 }

@@ -17,8 +17,7 @@ const allowOrigin = process.env['CORS_ALLOW_ORIGIN'];
 const counterPath = '/counter';
 const maxCookieAge = 60 * 60 * 1000; //1hr session keep-alive
 const port = Number.parseInt(process.env['PORT'] ?? '3000');
-const sessionSigningSecret =
-	'In a real app this might be read from a secrets manager';
+const sessionSigningSecret = 'In a real app this might be read from a secrets manager';
 
 const app = express();
 const env = app.get('env');
@@ -32,7 +31,8 @@ console.log(`env=${env}`);
 // Therefore we use Express API overrides to modify our Request IP and Protocol properties:
 // https://expressjs.com/en/guide/overriding-express-api.html
 const parseForwardedHeader = (header?: string) =>
-	header?.split(",")
+	header
+		?.split(',')
 		.flatMap((proxy) => proxy.split(';'))
 		.reduce(
 			(result, proxyProps) => {
@@ -52,7 +52,7 @@ Object.defineProperty(app.request, 'ip', {
 		const header = this.header('Forwarded') as ReturnType<typeof app.request.header>;
 		const proxies = parseForwardedHeader(header);
 		return proxies?.['for']?.[0] ?? this.socket.remoteAddress;
-	}
+	},
 });
 
 Object.defineProperty(app.request, 'protocol', {
@@ -62,52 +62,51 @@ Object.defineProperty(app.request, 'protocol', {
 		const header = this.header('Forwarded') as ReturnType<typeof app.request.header>;
 		const proxies = parseForwardedHeader(header);
 		return proxies?.['proto']?.[0] ?? this.socket.encrypted ? 'https' : 'http';
-	}
+	},
 });
 
 // Generic middleware
-app
-	.use(express.json())
-	.use(cors({
+app.use(express.json()).use(
+	cors({
 		origin: allowOrigin,
 		credentials: true,
-	}));
+	})
+);
 
 // Session shenanigans
-app
-	.use(
-		counterPath,
-		session({
-			name: cookieSID,
-			resave: false,
-			saveUninitialized: true,
-			secret: sessionSigningSecret,
-			store: new (memoryStoreFactory(session))({
-				checkPeriod: maxCookieAge,
-			}),
-			cookie: {
-				maxAge: maxCookieAge,
-				path: counterPath,
-				partitioned: isProd,
-				sameSite: isProd ? 'none' : 'strict',
-				secure: isProd,
-			},
+app.use(
+	counterPath,
+	session({
+		name: cookieSID,
+		resave: false,
+		saveUninitialized: true,
+		secret: sessionSigningSecret,
+		store: new (memoryStoreFactory(session))({
+			checkPeriod: maxCookieAge,
 		}),
-		(req, _res, next) => {
-			// initialise session first time
-			if (req.session.count === undefined) {
-				req.session.count = 0;
-			}
-			next();
+		cookie: {
+			maxAge: maxCookieAge,
+			path: counterPath,
+			partitioned: isProd,
+			sameSite: isProd ? 'none' : 'strict',
+			secure: isProd,
 		},
-		(req, res, next) => {
-			console.log('Request:', req.ip, `secure=${req.secure}`, req.headers);
-			res.on('finish', () => {
-				console.log('Response:', req.path, res.getHeaders());
-			});
-			next();
+	}),
+	(req, _res, next) => {
+		// initialise session first time
+		if (req.session.count === undefined) {
+			req.session.count = 0;
 		}
-	);
+		next();
+	},
+	(req, res, next) => {
+		console.log('Request:', req.ip, `secure=${req.secure}`, req.headers);
+		res.on('finish', () => {
+			console.log('Response:', req.path, res.getHeaders());
+		});
+		next();
+	}
+);
 
 // Main route handlers
 app
@@ -126,7 +125,7 @@ app
 // Health-check for remote deployment
 app.get('/health', (_req, res) => {
 	res.send();
-})
+});
 
 // Run the bugger
 app.listen(port, () => console.log(`Server started on port ${port}`));

@@ -2,13 +2,7 @@
 import 'source-map-support/register';
 import { App, Environment } from 'aws-cdk-lib';
 
-import {
-	FargateStack,
-	HttpApiStack,
-	RestApiStack,
-	UiStack,
-	utils
-} from '../lib';
+import { FargateStack, HttpApiStack, RestApiStack, UiStack, utils } from '../lib';
 
 const app = new App();
 
@@ -34,16 +28,16 @@ const { cloudfrontUrl: webappUrl } = new UiStack(app, generateStackName('ui'), {
 	tags,
 });
 
-const {
-	applicationLoadBalancer,
-	logBucket,
-	vpc
-} = new FargateStack(app, generateStackName('fargate'), {
-	description: generateDescription('Fargate Stack'),
-	env,
-	tags,
-	webappUrl,
-});
+const { applicationLoadBalancer, logBucket, vpc } = new FargateStack(
+	app,
+	generateStackName('fargate'),
+	{
+		description: generateDescription('Fargate Stack'),
+		env,
+		tags,
+		webappUrl,
+	}
+);
 
 if (apiType === 'rest') {
 	new RestApiStack(app, generateStackName('rest-api'), {

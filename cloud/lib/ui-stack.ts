@@ -50,32 +50,28 @@ export class UiStack extends Stack {
 
 		// CloudFront
 		const cachePolicyName = generateResourceName('site-cachepolicy');
-		const cloudFront = new Distribution(
-			this,
-			generateResourceName('site-distribution'),
-			{
-				defaultRootObject: 'index.html',
-				errorResponses: [
-					{
-						httpStatus: 404,
-						responseHttpStatus: 200,
-						responsePagePath: '/index.html',
-						ttl: Duration.seconds(30),
-					},
-				],
-				defaultBehavior: {
-					origin: new S3Origin(hostBucket, {
-						originAccessIdentity,
-					}),
-					cachePolicy: new CachePolicy(this, cachePolicyName, {
-						cachePolicyName,
-						cookieBehavior: CacheCookieBehavior.allowList(`${appName}.sid`),
-					}),
-					allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-					viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+		const cloudFront = new Distribution(this, generateResourceName('site-distribution'), {
+			defaultRootObject: 'index.html',
+			errorResponses: [
+				{
+					httpStatus: 404,
+					responseHttpStatus: 200,
+					responsePagePath: '/index.html',
+					ttl: Duration.seconds(30),
 				},
-			}
-		);
+			],
+			defaultBehavior: {
+				origin: new S3Origin(hostBucket, {
+					originAccessIdentity,
+				}),
+				cachePolicy: new CachePolicy(this, cachePolicyName, {
+					cachePolicyName,
+					cookieBehavior: CacheCookieBehavior.allowList(`${appName}.sid`),
+				}),
+				allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+				viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+			},
+		});
 		this.cloudfrontUrl = `https://${cloudFront.domainName}`;
 
 		new CfnOutput(this, 'WebURL', {

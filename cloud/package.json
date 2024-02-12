@@ -11,7 +11,8 @@
 		"deploy": "cdk deploy --all --app cdk.out",
 		"deploy:ui": "cd ../ui && npm run build && aws s3 sync dist s3://demo-apigwfargate-host-bucket --delete",
 		"destroy": "cdk destroy --all --app cdk.out",
-		"clean": "npx rimraf cdk.out"
+		"clean": "npx rimraf cdk.out",
+		"format": "prettier . --write"
 	},
 	"devDependencies": {
 		"@types/node": "^18.19.14",

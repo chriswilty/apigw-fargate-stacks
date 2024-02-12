@@ -1,7 +1,5 @@
 {
-	"extends": [
-		"@tsconfig/strictest/tsconfig.json"
-	],
+	"extends": ["@tsconfig/strictest/tsconfig.json"],
 	"compilerOptions": {
 		"module": "ESNext",
 		"moduleResolution": "Bundler",

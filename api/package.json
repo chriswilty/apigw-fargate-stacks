@@ -10,7 +10,8 @@
 		"start": "tsx -r dotenv/config server.ts",
 		"docker:start": "docker compose up -d",
 		"docker:logs": "docker compose logs -f",
-		"docker:stop": "docker compose down"
+		"docker:stop": "docker compose down",
+		"format": "prettier . --write"
 	},
 	"dependencies": {
 		"cors": "^2.8.5",
