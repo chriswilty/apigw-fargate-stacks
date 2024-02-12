@@ -10,8 +10,8 @@
 		"format": "prettier . --write"
 	},
 	"devDependencies": {
-		"@tsconfig/strictest": "^2.0.2",
-		"@types/node": "18.19.10",
+		"@tsconfig/strictest": "^2.0.3",
+		"@types/node": "^18.19.15",
 		"parcel": "^2.11.0",
 		"rimraf": "^5.0.5"
 	},
