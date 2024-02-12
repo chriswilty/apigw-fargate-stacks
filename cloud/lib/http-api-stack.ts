@@ -1,6 +1,6 @@
 import { CorsHttpMethod, HttpApi, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpAlbIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
-import { Peer, Port, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { Port, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { CfnOutput, Stack, StackProps, Tags } from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
@@ -8,7 +8,7 @@ import { Construct } from 'constructs';
 import { resourceName } from './resourceNamingUtils';
 
 type HttpApiStackProps = StackProps & {
-	loadBalancer: ApplicationLoadBalancer;
+	applicationLoadBalancer: ApplicationLoadBalancer;
 	vpc: Vpc;
 	webappUrl: string;
 }
@@ -17,7 +17,7 @@ export class HttpApiStack extends Stack {
 	constructor(scope: Construct, id: string, props: HttpApiStackProps) {
 		super(scope, id, props);
 
-		const { loadBalancer, vpc, webappUrl } = props;
+		const { applicationLoadBalancer, vpc, webappUrl } = props;
 
 		const generateResourceName = resourceName(scope);
 
@@ -34,8 +34,8 @@ export class HttpApiStack extends Stack {
 			securityGroupName,
 			allowAllOutbound: false,
 		});
-		vpcLinkSecurityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(80), 'APIGW to VPCLink');
-		vpcLinkSecurityGroup.connections.allowTo(loadBalancer, Port.tcp(80), 'VPCLink to ALB');
+		vpcLinkSecurityGroup.connections.allowFromAnyIpv4(Port.tcp(80), 'APIGW to VPCLink');
+		vpcLinkSecurityGroup.connections.allowTo(applicationLoadBalancer, Port.tcp(80), 'VPCLink to ALB');
 		vpcLink.addSecurityGroups(vpcLinkSecurityGroup);
 
 		// Tags are not propagated, so must do this manually
@@ -63,7 +63,7 @@ export class HttpApiStack extends Stack {
 			path: '/{proxy+}',
 			integration: new HttpAlbIntegration(
 				generateResourceName('api-integration'),
-				loadBalancer.listeners[0],
+				applicationLoadBalancer.listeners[0],
 				{ vpcLink },
 			),
 		});

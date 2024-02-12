@@ -6,8 +6,8 @@
 		"cloud": "bin/cloud.js"
 	},
 	"scripts": {
-		"synth:http": "cdk synth -q \"*\" --app \"npx tsx -r dotenv/config bin/app-httpapi.ts\"",
-		"synth:rest": "cdk synth -q \"*\" --app \"npx tsx -r dotenv/config bin/app-restapi.ts\"",
+		"synth:http": "cdk synth -q \"*\" --context API_TYPE=http",
+		"synth:rest": "cdk synth -q \"*\" --context API_TYPE=rest",
 		"deploy": "cdk deploy --all --app cdk.out",
 		"deploy:ui": "cd ../ui && npm run build && aws s3 sync dist s3://demo-apigwfargate-host-bucket --delete",
 		"destroy": "cdk destroy --all --app cdk.out",

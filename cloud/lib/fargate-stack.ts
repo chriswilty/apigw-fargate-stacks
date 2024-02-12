@@ -15,13 +15,15 @@ type FargateStackProps = StackProps & {
 }
 
 export class FargateStack extends Stack {
-	public readonly loadBalancer: ApplicationLoadBalancer;
+	public readonly applicationLoadBalancer: ApplicationLoadBalancer;
+	public readonly logBucket: Bucket;
 	public readonly vpc: Vpc;
 
 	constructor(scope: Construct, id: string, props: FargateStackProps) {
 		super(scope, id, props);
 
 		const { webappUrl } = props;
+		const { CONTAINER_PORT, HEALTHCHECK_PATH } = process.env;
 
 		const generateResourceName = resourceName(scope);
 
@@ -33,7 +35,7 @@ export class FargateStack extends Stack {
 			}
 		);
 
-		const containerPort = Number.parseInt(process.env.CONTAINER_PORT ?? '3000');
+		const containerPort = Number.parseInt(CONTAINER_PORT ?? '3000');
 		const clusterName = generateResourceName('cluster');
 		const fargateServiceName = generateResourceName('fargate');
 		const loadBalancerName = generateResourceName('loadbalancer');
@@ -41,6 +43,11 @@ export class FargateStack extends Stack {
 		const vpcName = generateResourceName('vpc');
 
 		this.vpc = new Vpc(this, vpcName, { vpcName, maxAzs: 2 });
+		this.logBucket = new Bucket(this, loadBalancerLogName, {
+			bucketName: loadBalancerLogName,
+			autoDeleteObjects: true,
+			removalPolicy: RemovalPolicy.DESTROY,
+		});
 
 		// Create a private, application-load-balanced Fargate service
 		const fargateService = new ApplicationLoadBalancedFargateService(
@@ -68,17 +75,10 @@ export class FargateStack extends Stack {
 			}
 		);
 		fargateService.targetGroup.configureHealthCheck({
-			path: '/health',
+			path: HEALTHCHECK_PATH,
 		});
-		fargateService.loadBalancer.logAccessLogs(
-			new Bucket(this, loadBalancerLogName, {
-				bucketName: loadBalancerLogName,
-				autoDeleteObjects: true,
-				removalPolicy: RemovalPolicy.DESTROY,
-			}),
-			'alb'
-		);
+		fargateService.loadBalancer.logAccessLogs(this.logBucket, 'app-lb');
 
-		this.loadBalancer = fargateService.loadBalancer;
+		this.applicationLoadBalancer = fargateService.loadBalancer;
 	}
 }
