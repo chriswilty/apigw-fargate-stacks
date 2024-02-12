@@ -17,7 +17,10 @@ const generateStackName = utils.stackName(app);
 const apiType: 'http' | 'rest' = app.node.tryGetContext('API_TYPE') || 'http';
 
 const tags = {
-	Project: utils.appName,
+	classification: 'personal',
+	'environment-type': 'testing',
+	'keep-alive': 'not-applicable',
+	owner: utils.appName,
 	Stage: utils.stageName.toUpperCase(),
 	IaC: 'CDK',
 };
