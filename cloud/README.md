@@ -1,8 +1,7 @@
 # CDK project for defining AWS resources
 
-I have defined two different stack configurations in their own CDK apps, based
-on a standard fargate container setup, but fronted by different variants of API
-Gateway:
+I have defined two different stack configurations in their own CDK apps, based on a standard fargate
+container setup, but fronted by different variants of API Gateway:
 
 - `HTTP API Gateway => VPCLink => Application Load Balancer`
 - `REST API Gateway => PrivateLink => Network Load Balancer => Application Load Balancer`
@@ -11,8 +10,8 @@ See the [main README](../README.md) for further details.
 
 ## Commands
 
-All CDK commands use your active AWS environment as defined in your default
-profile, unless you specify a different profile on command line.
+All CDK commands use your active AWS environment as defined in your default profile, unless you
+specify a different profile on command line.
 
 Before you run any command, first time you need to
 [bootstrap your AWS environment for CDK usage](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html),
@@ -31,17 +30,21 @@ npx cdk bootstrap --custom-permissions-boundary cdk-developer-policy
 
 ### Synth
 
-Synthesizes the CloudFormation templates for the desired CDK application.
-The templates and asset definition are written to `cdk.out/` directory
+Synthesizes the CloudFormation templates for the desired CDK application. The templates and asset
+definitions are written to `cdk.out/` directory.
 
 - `npm run synth:http` generates the HTTP API Gateway stacks
 - `npm run synth:rest` generates the REST API Gateway stacks
 
 ### Deploy
 
-- `npm run deploy` deploys your AWS resources - make a note of the `APIGWURL` output, needed for deploying the UI...
-- `API_URL=(insert APIGWURL here) npm run deploy:ui` deploys the UI bundle to the host bucket; only needed
-  after first stack deployment, or when you make changes to the UI code
+Deploying the stacks takes a while, so be patient. Command-line output is verbose enough that you
+can see how far you've come ⏳
+
+- `npm run deploy` deploys your AWS resources - make a note of the `APIGWURL` output, needed for
+  deploying the UI...
+- `API_URL=(insert APIGWURL here) npm run deploy:ui` deploys the UI bundle to the host bucket; only
+  needed after first stack deployment, or when you make changes to the UI code
 
 ### Clean up
 
